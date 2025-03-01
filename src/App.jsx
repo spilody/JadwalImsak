@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -54,7 +54,7 @@ const glowAnimation = keyframes`
 dayjs.locale('id');
 
 function App() {
-  // 1. All useState hooks
+  // State hooks
   const [dataJadwal, setDataJadwal] = useState([]);
   const [kotaTerpilih, setKotaTerpilih] = useState('');
   const [daftarKota, setDaftarKota] = useState([]);
@@ -67,11 +67,11 @@ function App() {
     return savedState ? JSON.parse(savedState) : false;
   });
 
-  // 2. All useContext hooks
+  // Context hooks
   const { colorMode, toggleColorMode } = useColorMode();
   const toast = useToast();
 
-  // 3. All useColorModeValue hooks
+  // Theme color hooks
   const warnaBg = useColorModeValue('gray.50', 'gray.900');
   const warnaKartu = useColorModeValue('white', 'gray.800');
   const warnaBorder = useColorModeValue('green.100', 'green.700');
@@ -89,127 +89,6 @@ function App() {
   const clockHandleColor = useColorModeValue('green.500', 'green.200');
   const modalBoxBg = useColorModeValue('white', 'gray.700');
 
-  // Helper functions
-  const formatNamaWaktu = (nama) => {
-    const peta = {
-      'imsak': 'Imsak',
-      'subuh': 'Subuh',
-      'terbit': 'Terbit',
-      'duha': 'Duha',
-      'dzuhur': 'Dzuhur',
-      'ashar': 'Ashar',
-      'maghrib': 'Maghrib',
-      'isya': 'Isya'
-    };
-    return peta[nama] || nama;
-  };
-
-  const urutkanWaktuSholat = (jadwal) => {
-    if (!jadwal) return [];
-    
-    const urutan = ['imsak', 'subuh', 'terbit', 'duha', 'dzuhur', 'ashar', 'maghrib', 'isya'];
-    return Object.entries(jadwal)
-      .filter(([key]) => key !== 'city' && key !== 'date')
-      .sort(([a], [b]) => urutan.indexOf(a) - urutan.indexOf(b));
-  };
-
-  // 4. All useCallback hooks
-  const ambilJadwalHariIni = useCallback((kota) => {
-    const hariIni = dayjs().format('D MMMM YYYY');
-    return dataJadwal.find(
-      item => item.city === kota && item.date === hariIni
-    );
-  }, [dataJadwal]);
-
-  const updateNextPrayer = useCallback(() => {
-    const jadwal = ambilJadwalHariIni(kotaTerpilih);
-    if (!jadwal) return;
-
-    const waktuSholat = urutkanWaktuSholat(jadwal);
-    const now = dayjs();
-    
-    let nextPrayerFound = false;
-    for (const [nama, waktu] of waktuSholat) {
-      const [hours, minutes] = waktu.split(':').map(Number);
-      const prayerTime = dayjs().hour(hours).minute(minutes).second(0);
-      const diff = prayerTime.diff(now);
-      
-      if (diff > 0) {
-        setNextPrayer({ name: formatNamaWaktu(nama), time: waktu });
-        const duration = dayjs.duration(diff);
-        setCountdown(`${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`);
-        nextPrayerFound = true;
-        break;
-      }
-    }
-
-    if (!nextPrayerFound) {
-      const [firstPrayer, firstTime] = waktuSholat[0];
-      const [hours, minutes] = firstTime.split(':').map(Number);
-      const nextDayPrayerTime = dayjs().add(1, 'day').hour(hours).minute(minutes).second(0);
-      const diff = nextDayPrayerTime.diff(now);
-      const duration = dayjs.duration(diff);
-      setNextPrayer({ name: formatNamaWaktu(firstPrayer), time: firstTime });
-      setCountdown(`${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`);
-    }
-  }, [ambilJadwalHariIni, kotaTerpilih]);
-
-  const updatePrayerCountdowns = useCallback(() => {
-    const jadwal = ambilJadwalHariIni(kotaTerpilih);
-    if (!jadwal) return;
-
-    const waktuSholat = urutkanWaktuSholat(jadwal);
-    const now = dayjs();
-    const newCountdowns = {};
-
-    for (const [nama, waktu] of waktuSholat) {
-      const [hours, minutes] = waktu.split(':').map(Number);
-      const prayerTime = dayjs().hour(hours).minute(minutes).second(0);
-      const diff = prayerTime.diff(now);
-      
-      if (diff > 0) {
-        const duration = dayjs.duration(diff);
-        newCountdowns[nama] = `${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`;
-      } else {
-        const nextDayPrayerTime = dayjs().add(1, 'day').hour(hours).minute(minutes).second(0);
-        const nextDiff = nextDayPrayerTime.diff(now);
-        const duration = dayjs.duration(nextDiff);
-        newCountdowns[nama] = `${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`;
-      }
-    }
-
-    setPrayerCountdowns(newCountdowns);
-  }, [ambilJadwalHariIni, kotaTerpilih]);
-
-  const checkAndNotifyPrayer = useCallback(() => {
-    if (!notificationsEnabled) return;
-
-    const jadwal = ambilJadwalHariIni(kotaTerpilih);
-    if (!jadwal) return;
-
-    const waktuSholat = urutkanWaktuSholat(jadwal);
-    const now = dayjs();
-
-    for (const [nama, waktu] of waktuSholat) {
-      const [hours, minutes] = waktu.split(':').map(Number);
-      const prayerTime = dayjs().hour(hours).minute(minutes).second(0);
-      const diff = prayerTime.diff(now, 'minutes');
-
-      if (diff === 10) {
-        new Notification(`Waktu ${formatNamaWaktu(nama)} dalam 10 menit`, {
-          body: `${formatNamaWaktu(nama)} akan masuk pada ${waktu}`,
-          icon: '/logo.png'
-        });
-      }
-    }
-  }, [notificationsEnabled, ambilJadwalHariIni, kotaTerpilih]);
-
-  // 5. All useMemo hooks
-  const jadwalHariIni = useMemo(() => {
-    return kotaTerpilih ? ambilJadwalHariIni(kotaTerpilih) : null;
-  }, [kotaTerpilih, ambilJadwalHariIni]);
-
-  // 6. All useEffect hooks
   useEffect(() => {
     const ambilData = async () => {
       const response = await fetch('/jadwal-imsakiyah.csv');
@@ -230,17 +109,38 @@ function App() {
     ambilData();
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (jadwalHariIni) {
-        updateNextPrayer();
-        updatePrayerCountdowns();
-        checkAndNotifyPrayer();
-      }
-    }, 1000);
+  const ambilJadwalHariIni = (kota) => {
+    const hariIni = dayjs().format('D MMMM YYYY');
+    
+    const jadwal = dataJadwal.find(
+      item => item.city === kota && item.date === hariIni
+    );
+    
+    return jadwal;
+  };
 
-    return () => clearInterval(timer);
-  }, [jadwalHariIni, updateNextPrayer, updatePrayerCountdowns, checkAndNotifyPrayer]);
+  const urutkanWaktuSholat = (jadwal) => {
+    if (!jadwal) return [];
+    
+    const urutan = ['imsak', 'subuh', 'terbit', 'duha', 'dzuhur', 'ashar', 'maghrib', 'isya'];
+    return Object.entries(jadwal)
+      .filter(([key]) => key !== 'city' && key !== 'date')
+      .sort(([a], [b]) => urutan.indexOf(a) - urutan.indexOf(b));
+  };
+
+  const formatNamaWaktu = (nama) => {
+    const peta = {
+      'imsak': 'Imsak',
+      'subuh': 'Subuh',
+      'terbit': 'Terbit',
+      'duha': 'Duha',
+      'dzuhur': 'Dzuhur',
+      'ashar': 'Ashar',
+      'maghrib': 'Maghrib',
+      'isya': 'Isya'
+    };
+    return peta[nama] || nama;
+  };
 
   const toggleNotifications = async () => {
     if (!notificationsEnabled) {
@@ -265,6 +165,108 @@ function App() {
     } else {
       setNotificationsEnabled(false);
       localStorage.setItem('notificationsEnabled', JSON.stringify(false));
+    }
+  };
+
+  useEffect(() => {
+    // Start countdown timer
+    const timer = setInterval(() => {
+      if (kotaTerpilih && ambilJadwalHariIni(kotaTerpilih)) {
+        updateNextPrayer();
+        updatePrayerCountdowns();
+        checkAndNotifyPrayer(); // Add notification check
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [kotaTerpilih, notificationsEnabled]);
+
+  const checkAndNotifyPrayer = () => {
+    if (!notificationsEnabled) return;
+
+    const jadwal = ambilJadwalHariIni(kotaTerpilih);
+    if (!jadwal) return;
+
+    const waktuSholat = urutkanWaktuSholat(jadwal);
+    const now = dayjs();
+
+    for (const [nama, waktu] of waktuSholat) {
+      const [hours, minutes] = waktu.split(':').map(Number);
+      const prayerTime = dayjs().hour(hours).minute(minutes).second(0);
+      const diff = prayerTime.diff(now, 'minutes');
+
+      // Notify 10 minutes before prayer time
+      if (diff === 10) {
+        const notification = new Notification(`Waktu ${formatNamaWaktu(nama)} dalam 10 menit`, {
+          body: `${formatNamaWaktu(nama)} akan masuk pada ${waktu}`,
+          icon: '/logo.png'
+        });
+
+        // Play notification sound
+        playNotificationSound();
+      }
+    }
+  };
+
+  const updatePrayerCountdowns = () => {
+    const jadwal = ambilJadwalHariIni(kotaTerpilih);
+    if (!jadwal) return;
+
+    const waktuSholat = urutkanWaktuSholat(jadwal);
+    const now = dayjs();
+    const newCountdowns = {};
+
+    for (const [nama, waktu] of waktuSholat) {
+      const [hours, minutes] = waktu.split(':').map(Number);
+      const prayerTime = dayjs().hour(hours).minute(minutes).second(0);
+      const diff = prayerTime.diff(now);
+      
+      if (diff > 0) {
+        const duration = dayjs.duration(diff);
+        newCountdowns[nama] = `${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`;
+      } else {
+        // If prayer time has passed, show countdown to next day's prayer time
+        const nextDayPrayerTime = dayjs().add(1, 'day').hour(hours).minute(minutes).second(0);
+        const nextDiff = nextDayPrayerTime.diff(now);
+        const duration = dayjs.duration(nextDiff);
+        newCountdowns[nama] = `${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`;
+      }
+    }
+
+    setPrayerCountdowns(newCountdowns);
+  };
+
+  const updateNextPrayer = () => {
+    const jadwal = ambilJadwalHariIni(kotaTerpilih);
+    if (!jadwal) return;
+
+    const waktuSholat = urutkanWaktuSholat(jadwal);
+    const now = dayjs();
+    
+    let nextPrayerFound = false;
+    for (const [nama, waktu] of waktuSholat) {
+      const [hours, minutes] = waktu.split(':').map(Number);
+      const prayerTime = dayjs().hour(hours).minute(minutes).second(0);
+      const diff = prayerTime.diff(now);
+      
+      if (diff > 0) {
+        setNextPrayer({ name: formatNamaWaktu(nama), time: waktu });
+        const duration = dayjs.duration(diff);
+        setCountdown(`${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`);
+        nextPrayerFound = true;
+        break;
+      }
+    }
+
+    if (!nextPrayerFound) {
+      // If no next prayer found today, set to first prayer of next day
+      const [firstPrayer, firstTime] = waktuSholat[0];
+      const [hours, minutes] = firstTime.split(':').map(Number);
+      const nextDayPrayerTime = dayjs().add(1, 'day').hour(hours).minute(minutes).second(0);
+      const diff = nextDayPrayerTime.diff(now);
+      const duration = dayjs.duration(diff);
+      setNextPrayer({ name: formatNamaWaktu(firstPrayer), time: firstTime });
+      setCountdown(`${String(duration.hours()).padStart(2, '0')}:${String(duration.minutes()).padStart(2, '0')}:${String(duration.seconds()).padStart(2, '0')}`);
     }
   };
 

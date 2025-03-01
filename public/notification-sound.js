@@ -10,7 +10,7 @@ const initAudio = async () => {
     const arrayBuffer = await response.arrayBuffer();
     audioBuffer = await audioContext.decodeAudioBuffer(arrayBuffer);
   } catch (error) {
-    // Error handling silently
+    console.error('Failed to initialize audio:', error);
   }
 };
 
@@ -26,6 +26,6 @@ export const playNotificationSound = async () => {
     source.connect(audioContext.destination);
     source.start(0);
   } catch (error) {
-    // Error handling silently
+    console.error('Failed to play notification sound:', error);
   }
 };
