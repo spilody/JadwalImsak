@@ -174,11 +174,39 @@ function App() {
       if (kotaTerpilih && ambilJadwalHariIni(kotaTerpilih)) {
         updateNextPrayer();
         updatePrayerCountdowns();
+        checkAndNotifyPrayer(); // Add notification check
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [kotaTerpilih]);
+  }, [kotaTerpilih, notificationsEnabled]);
+
+  const checkAndNotifyPrayer = () => {
+    if (!notificationsEnabled) return;
+
+    const jadwal = ambilJadwalHariIni(kotaTerpilih);
+    if (!jadwal) return;
+
+    const waktuSholat = urutkanWaktuSholat(jadwal);
+    const now = dayjs();
+
+    for (const [nama, waktu] of waktuSholat) {
+      const [hours, minutes] = waktu.split(':').map(Number);
+      const prayerTime = dayjs().hour(hours).minute(minutes).second(0);
+      const diff = prayerTime.diff(now, 'minutes');
+
+      // Notify 10 minutes before prayer time
+      if (diff === 10) {
+        const notification = new Notification(`Waktu ${formatNamaWaktu(nama)} dalam 10 menit`, {
+          body: `${formatNamaWaktu(nama)} akan masuk pada ${waktu}`,
+          icon: '/logo.png'
+        });
+
+        // Play notification sound
+        playNotificationSound();
+      }
+    }
+  };
 
   const updatePrayerCountdowns = () => {
     const jadwal = ambilJadwalHariIni(kotaTerpilih);
