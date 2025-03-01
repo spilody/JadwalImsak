@@ -526,33 +526,12 @@ function App() {
                 placeholder="Pilih Kota"
                 size="lg"
                 bg={warnaSelectBg}
-                _hover={{ 
-                  bg: warnaSelectHover,
-                  transform: 'translateY(-2px)',
-                  boxShadow: 'lg'
-                }}
-                _focus={{
-                  borderColor: 'green.400',
-                  boxShadow: '0 0 0 3px rgba(72, 187, 120, 0.2)'
-                }}
+                _hover={{ bg: warnaSelectHover }}
                 borderColor={warnaBorder}
                 borderWidth="2px"
                 borderRadius="xl"
                 icon={<Box as="span" className="select-icon">▼</Box>}
-                p={{ base: 6, md: 2 }}
-                fontSize={{ base: "lg", md: "md" }}
-                transition="all 0.3s ease"
-                sx={{
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                    borderRadius: '8px',
-                    backgroundColor: `rgba(0, 0, 0, 0.05)`
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: `rgba(72, 187, 120, 0.5)`,
-                    borderRadius: '8px'
-                  }
-                }}
+                p={2}
               >
                 {daftarKota.map((kota) => (
                   <option key={kota} value={kota}>

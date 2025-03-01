@@ -55,49 +55,15 @@
   letter-spacing: 2px;
 }
 
-/* Enhanced select styling for mobile */
-.chakra-select {
-  appearance: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  backdrop-filter: blur(8px);
-}
-
-.chakra-select:focus {
-  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
-  transform: scale(1.01);
-}
-
 /* Custom select icon */
 .select-icon {
   color: #48BB78;
   font-size: 0.9em;
-  transition: all 0.3s ease;
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
+  transition: transform 0.3s ease;
 }
 
 .chakra-select:hover .select-icon {
-  transform: translateY(-50%) scale(1.1);
-}
-
-/* Mobile-specific enhancements */
-@media (max-width: 480px) {
-  .chakra-select {
-    font-size: 1.1rem;
-    padding: 1rem;
-    height: auto;
-  }
-
-  .chakra-select option {
-    padding: 1rem;
-    font-size: 1.1rem;
-  }
+  transform: translateY(2px);
 }
 
 /* Animasi untuk kartu waktu sholat */
