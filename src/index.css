@@ -1,0 +1,102 @@
+/* Tambahan CSS untuk desain Islami */
+.chakra-card {
+  backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+/* Animasi fade-in yang lebih halus */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chakra-card {
+  animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efek hover yang lebih halus */
+.chakra-card,
+.chakra-select,
+.chakra-badge,
+.chakra-button {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Gaya scrollbar yang disesuaikan */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(72, 187, 120, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #48BB78;
+  border-radius: 4px;
+  border: 2px solid rgba(72, 187, 120, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #38A169;
+}
+
+/* Efek bayangan untuk teks arab */
+.arabic-text {
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  letter-spacing: 2px;
+}
+
+/* Custom select icon */
+.select-icon {
+  color: #48BB78;
+  font-size: 0.9em;
+  transition: transform 0.3s ease;
+}
+
+.chakra-select:hover .select-icon {
+  transform: translateY(2px);
+}
+
+/* Animasi untuk kartu waktu sholat */
+.chakra-card {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chakra-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Efek hover untuk tombol */
+.chakra-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.chakra-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.chakra-button:hover::after {
+  width: 200%;
+  height: 200%;
+}
