@@ -197,7 +197,7 @@ function App() {
 
       // Notify 10 minutes before prayer time
       if (diff === 10) {
-        const notification = new Notification(`Waktu ${formatNamaWaktu(nama)} dalam 10 menit`, {
+        new Notification(`Waktu ${formatNamaWaktu(nama)} dalam 10 menit`, {
           body: `${formatNamaWaktu(nama)} akan masuk pada ${waktu}`,
           icon: '/logo.png'
         });
